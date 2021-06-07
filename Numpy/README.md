@@ -36,4 +36,16 @@
       <img alt="BCE Loss Curve" src = "./SVM/HingeLossCurve.png">
   </td>
   </tr>
+
+  <tr>
+    <td colspan="2">K-Means</td>
+  </tr>
+  <tr>
+    <td>
+      <img alt="KMeans Clustering" src = "./KMeans/KMeansClustering.png">
+  </td>
+    <td>
+      <img alt="Elbow Curve" src = "./KMeans/ElbowCurve.png">
+  </td>
+  </tr>
 </table>
