@@ -9,7 +9,7 @@ from trainKMeans import *
 df = pd.read_csv('data.csv', header = None)
 X = df.values
 
-CLUSTERS,idx,centroids_history,cost = trainKMeans(X)
+CLUSTERS,idx,centroids_history,cost = trainKMeans(X, max_clusters = 5)
 
 # Changing default colors of plt.scatterplot input data
 colors = cm.rainbow(np.linspace(0, 1, CLUSTERS))

@@ -6,10 +6,9 @@ from computeMeans import *
 from computeCost import *
 
 # returns centroids, centroids_history for best choice of K on basis of elbow curve
-def trainKMeans(X, max_iter = 15, max_clusters = 10):
+def trainKMeans(X, threshold = 100, max_clusters = 10):
 	final_cost = -1
 	update = True
-	threshold = 100
 	final_clusters:int
 	final_centroids_history:list
 	final_idx:np.ndarray
@@ -21,14 +20,18 @@ def trainKMeans(X, max_iter = 15, max_clusters = 10):
 		# Initializing Centroids
 		centroids = initializeCentroids(X, CLUSTERS)
 
-		# Manually choose initial centroids for visualization purpose
-		if CLUSTERS == 3:
-			centroids = np.array([[3,3],[6,2],[8,5]])
-
-		for epoch in range(max_iter):
-			centroids_history.append(centroids)
+		centroids_history.append(centroids)
+		prev_cost = -1
+		while(True):
 			idx = findClosestCentroid(X, centroids)
 			centroids = computeMeans(X, idx, CLUSTERS)
+			cur_cost = computeCost(X,idx,centroids)
+			if prev_cost == -1 or prev_cost > cur_cost:
+				prev_cost = cur_cost
+				centroids_history.append(centroids)
+			else:
+				break
+
 		cost = computeCost(X,idx,centroids)
 		costs.append(cost)
 		if not update:
@@ -47,12 +50,11 @@ def trainKMeans(X, max_iter = 15, max_clusters = 10):
 				final_clusters = CLUSTERS
 				final_idx = idx
 				final_centroids_history = centroids_history
+	# Plot inertia vs K graph
 	xx = np.arange(1, max_clusters + 1)
-	plt.plot(xx, costs)
+	plt.plot(xx, costs, "-o")
 	plt.xlabel('Number of Clusters')
 	plt.ylabel('Inertia')
 	plt.title('Elbow Curve')
-	plt.scatter(final_clusters, costs[final_clusters - 1], label=f"K = {final_clusters}", color='black')
-	plt.legend()
 	plt.show()
 	return [final_clusters, final_idx, final_centroids_history, final_cost]

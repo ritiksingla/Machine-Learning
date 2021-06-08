@@ -38,6 +38,15 @@
   </tr>
 
   <tr>
+    <td colspan="2">Decision Tree</td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <img alt="Decision Tree Model" src = "./Decision%20Tree/model.svg">
+    </td>
+  </tr>
+
+  <tr>
     <td colspan="2">K-Means</td>
   </tr>
   <tr>
@@ -48,4 +57,5 @@
       <img alt="Elbow Curve" src = "./KMeans/ElbowCurve.png">
   </td>
   </tr>
+
 </table>
