@@ -58,4 +58,16 @@
   </td>
   </tr>
 
+  <tr>
+    <td colspan="2">Principal Component Analysis (PCA)</td>
+  </tr>
+  <tr>
+    <td>
+      <img alt="ANSUR BMI PCA" src = "./PCA/ansur_bmi.png">
+  </td>
+    <td>
+      <img alt="ANSUR Height PCA" src = "./PCA/ansur_height.png">
+  </td>
+  </tr>
+
 </table>

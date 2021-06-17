@@ -2,12 +2,14 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import seaborn as sns
 from featureNormalize import *
 from gradientDescent import *
 from normalEquation import *
 
-# sns.set_theme()
+def score(Y, pred):
+	u = np.power(Y - pred, 2).sum()
+	v = np.power(Y - Y.mean(), 2).sum()
+	return (1 - u / v)
 
 # Linear Regression with two features
 df = pd.read_csv("house_price.csv")
@@ -36,6 +38,8 @@ print(f'Theta values using gradientDescent: {theta}')
 X_test = np.array([1, (3137 - mu[0])/sigma[0], (3 - mu[1])/sigma[1]])
 print(f'Actual price for 3137 sq feet area and 3 rooms: 579900')
 print(f'Predicted: {np.dot(X_test, theta)}')
+
+print(f'R2 score: {score(y, np.dot(X, theta))}')
 
 # Plot input data
 fig = plt.figure(figsize = (10, 7))
