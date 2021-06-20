@@ -46,7 +46,7 @@ class DecisionTreeClassifier:
 		self.criterion = criterion
 		self.max_depth = max_depth
 		assert max_features == None or max_features > 0
-		self.max_features_ = max_features
+		self.max_features = max_features
 
 	def get_class_distribution(self, node):
 		class_distribution = {}
@@ -115,10 +115,10 @@ class DecisionTreeClassifier:
 		valid_split = False
 		while valid_split == False:
 			
-			if self.max_features_ == None or self.max_features_ >= X.shape[1]:
+			if self.max_features == None or self.max_features >= X.shape[1]:
 				cur_features = range(X.shape[1])
 			else:
-				cur_features = np.random.choice(X.shape[1], self.max_features_, replace = False)
+				cur_features = np.random.choice(X.shape[1], self.max_features, replace = False)
 			
 			for N in cur_features:
 				possible_split_points = self.get_nth_feature_means(X, N)
@@ -162,13 +162,8 @@ class DecisionTreeClassifier:
 
 	def fit(self, X, Y):
 		assert X.shape[0] == Y.shape[0], "Shapes for data and targets must be same"
-		if self.max_features_ != None and X.shape[1] < self.max_features_:
-			self.max_features_ = X.shape[1]
-		
-		self.n_outputs_ = Y.shape[0]
-		self.n_classes_ = len(np.unique(Y).tolist())
-		self.n_features_ = X.shape[1]
-
+		if self.max_features != None and X.shape[1] < self.max_features:
+			self.max_features = X.shape[1]
 		self.root = Node(0, X, Y, self.criterion)
 		return self.build_tree(self.root)
 
@@ -183,6 +178,7 @@ class DecisionTreeClassifier:
 			else:
 				cur_node = cur_node.right
 		return cur_node.Y[0].item()
+
 	def predict(self, X):
 		if len(X.shape) == 1:
 			X = np.expand_dims(X, axis = 0)
@@ -197,3 +193,64 @@ class DecisionTreeClassifier:
 		pred = np.array(pred).reshape(-1, 1)
 		correct = (pred == Y).sum()
 		return (correct / X.shape[0])*100
+
+class RandomForestClassifier:
+    def __init__(self, n_estimators = 100, criterion = 'gini', max_depth = None, max_features = None, bootstrap = True, oob_score = False):
+    	assert n_estimators > 0, "n_estimators must be positive"
+    	self.n_estimators = n_estimators
+    	self.criterion = criterion
+    	self.max_depth = max_depth
+    	self.max_features = max_features
+    	self.bootstrap = bootstrap
+    	if oob_score == True:
+    		assert bootstrap == True, "Bootstrap should be true for out of bag score!"
+    	self.oob_score = oob_score
+    	self.trees = []
+
+    def getBootstrappedData(self, X, Y):
+        idx = np.random.choice(self.n_outputs_, self.n_outputs_)
+        self.indices = np.unique(idx)
+        return X[idx], Y[idx]
+
+    def fit(self, X, Y):
+        assert X.shape[0] == Y.shape[0]
+        
+        self.n_outputs_ = Y.shape[0]
+        self.n_classes_ = len(np.unique(Y).tolist())
+        self.n_features_ = X.shape[1]
+
+        self.trees = []
+        if self.bootstrap == True:
+        	X_,Y_ = self.getBootstrappedData(X, Y)
+        else:
+        	self.indices = np.arange(self.n_outputs_)
+        	X_,Y_ = X, Y
+        for _ in range(self.n_estimators):
+        	tree = DecisionTreeClassifier(criterion=self.criterion, max_depth = self.max_depth, max_features = self.max_features)
+        	tree.fit(X_, Y_)
+        	self.trees.append(tree)
+
+    def predict(self, X):
+    	pred_list = []
+    	pred = []
+    	for n in range(self.n_estimators):
+    		tree = self.trees[n]
+    		cur_pred = tree.predict(X)
+    		for i in range(X.shape[0]):
+    			if n == 0:
+    				pred_list.append(dict())
+    			if cur_pred[i] not in pred_list[i]:
+    				pred_list[i][cur_pred[i]] = 1
+    			else:
+    				pred_list[i][cur_pred[i]] += 1
+    	for key in pred_list:
+    		pred.append(max(key, key=key.get))
+    	return pred
+
+    def accuracy(self, X, Y):
+    	assert len(self.trees) != 0, "Fit the model first"
+    	assert X.shape[0] == Y.shape[0]
+    	pred = self.predict(X)
+    	pred = np.array(pred).reshape(-1, 1)
+    	correct = (pred == Y).sum()
+    	return (correct / X.shape[0])*100
